@@ -1,0 +1,26 @@
+sudo: false
+language: rust
+env:
+  - CC=clang
+
+matrix:
+    include:
+        - rust: stable
+        - rust: beta
+        - rust: nightly
+    allow_failures:
+        - rust: beta
+        - rust: nightly
+    fast_finish: true
+
+script:
+    - cargo build --verbose
+
+    # FIXME: Get a RISC-V toolchain on Travis somehow?
+    # - cargo test --verbose
+
+    # FIXME: Fails to link tests on Travis, works locally.
+    # - |
+    #     if [ $TRAVIS_RUST_VERSION == "nightly" ]; then
+    #         cargo install clippy && cargo clippy -- -Dclippy
+    #     fi

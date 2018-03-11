@@ -1,0 +1,31 @@
+[package]
+name = "rvsim"
+version = "0.1.0"
+authors = ["Stéphan Kochen <stephan@kochen.nl>"]
+description = "A RISC-V simulator implementing RV32G."
+license = "MIT"
+categories = ["emulators"]
+repository = "https://github.com/stephank/rvsim"
+build = "build/main.rs"
+exclude = [
+    ".*",
+    "tests/*",
+    "vendor/riscv-tests/*",
+]
+
+[features]
+serialize = ["serde", "serde_derive"]
+
+[dependencies]
+serde = { version = "1.0", optional = true }
+serde_derive = { version = "1.0", optional = true }
+
+[dev-dependencies]
+rayon = "1.0"
+
+[build-dependencies]
+gcc = "0.3"
+regex = "0.2"
+
+[package.metadata.docs.rs]
+all-features = true 
