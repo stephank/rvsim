@@ -27,6 +27,8 @@ pub struct Interp<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> {
     pub mem: &'m mut M,
     /// The clock implementation.
     pub clock: &'c mut C,
+    /// Size of the last instruction (2 or 4).
+    instsz: u32,
 }
 
 impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
@@ -34,7 +36,7 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     ///
     /// This is just a short-hand; fields may also be set directly.
     pub fn new(state: &'s mut CpuState, mem: &'m mut M, clock: &'c mut C) -> Self {
-        Self { state, mem, clock }
+        Self { state, mem, clock, instsz: 4 }
     }
 
     /// Run continuously until execution stops, starting at the current PC address.
@@ -60,14 +62,40 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
             return Err((CpuError::QuotaExceeded, None));
         }
 
-        // Read the next instruction.
-        let mut instr: u32 = 0;
-        if !self.mem.access(self.state.pc, MemoryAccess::Exec(&mut instr)) {
-            return Err((CpuError::IllegalFetch, None));
-        }
+        let op = match {
+            #[cfg(feature = "rv32c")]
+            {
+                // Read the next instruction.
+                let mut instr_lo: u16 = 0;
+                if !self.mem.access(self.state.pc, MemoryAccess::Exec(&mut instr_lo)) {
+                    return Err((CpuError::IllegalFetch, None));
+                }
 
-        // Parse into an `Op`.
-        let op = match Op::parse(instr) {
+                // Parse into an `Op`.
+                if (instr_lo & 3) == 3 {
+                    let mut instr_hi: u16 = 0;
+                    if !self.mem.access(self.state.pc + 2, MemoryAccess::Exec(&mut instr_hi)) {
+                        return Err((CpuError::IllegalFetch, None));
+                    }
+                    self.instsz = 4;
+                    Op::parse((instr_hi as u32) << 16 | (instr_lo as u32))
+                } else {
+                    self.instsz = 2;
+                    Op::parse_c(instr_lo)
+                }
+            }
+            #[cfg(not(feature = "rv32c"))]
+            {
+                // Read the next instruction.
+                let mut instr: u32 = 0;
+                if !self.mem.access(self.state.pc, MemoryAccess::Exec(&mut instr)) {
+                    return Err((CpuError::IllegalFetch, None));
+                }
+
+                // Parse into an `Op`.
+                Op::parse(instr)
+            }
+        } {
             Some(op) => op,
             None => return Err((CpuError::IllegalInstruction, None)),
         };
@@ -219,7 +247,7 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //% opcode=110_1111
     fn jal(&mut self, rd: usize, j_imm: i32) -> CpuExit {
         write_rd!(self, rd, {
-            self.state.pc.wrapping_add(4)
+            self.state.pc.wrapping_add(self.instsz)
         });
         end_jump_op!(self, {
             self.state.pc.wrapping_add(j_imm as u32)
@@ -229,7 +257,7 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //% opcode=110_0111 funct3=000
     fn jalr(&mut self, rd: usize, rs1: usize, i_imm: i32) -> CpuExit {
         write_rd!(self, rd, {
-            self.state.pc.wrapping_add(4)
+            self.state.pc.wrapping_add(self.instsz)
         });
         end_jump_op!(self, {
             self.state.x[rs1].wrapping_add(i_imm as u32)
@@ -1474,4 +1502,113 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
             }
         } });
     }
+
+    //
+    // "C" Standard Extension for Compressed Instructions, Version 2.0
+    //
+
+    //% cquad=00 cfunct3=000 cimm4spn=0000_0000
+    //    name=c_illegal decomp=illegal
+    //
+    //% cquad=00 cfunct3=000 cimm4spn=_
+    //    name=c_addi4spn decomp=addi rd=crs2q rs1=crsp i_imm=cimm4spn
+    //
+    //% cquad=00 cfunct3=001
+    //    name=c_fld decomp=fld rd=crs2q rs1=crs1rdq i_imm=cimmd
+    //
+    //% cquad=00 cfunct3=010
+    //    name=c_lw decomp=lw rd=crs2q rs1=crs1rdq i_imm=cimmw
+    //
+    //% cquad=00 cfunct3=011
+    //    name=c_flw decomp=flw rd=crs2q rs1=crs1rdq i_imm=cimmw
+    //
+    //% cquad=00 cfunct3=101
+    //    name=c_fsd decomp=fsd rs1=crs1rdq rs2=crs2q s_imm=cimmd
+    //
+    //% cquad=00 cfunct3=110
+    //    name=c_sw decomp=sw rs1=crs1rdq rs2=crs2q s_imm=cimmw
+    //
+    //% cquad=00 cfunct3=111
+    //    name=c_fsw decomp=fsw rs1=crs1rdq rs2=crs2q s_imm=cimmw
+    //
+    //% cquad=01 cfunct3=000
+    //    name=c_addi decomp=addi rd=crs1rd rs1=crs1rd i_imm=cimmi
+    //
+    //% cquad=01 cfunct3=001
+    //    name=c_jal decomp=jal rd=crra j_imm=cimmj
+    //
+    //% cquad=01 cfunct3=010
+    //    name=c_li decomp=addi rd=crs1rd rs1=crx0 i_imm=cimmi
+    //
+    //% cquad=01 cfunct3=011 crs1rd=0_0010
+    //    name=c_addi16sp decomp=addi rd=crsp rs1=crsp i_imm=cimm16sp
+    //
+    //% cquad=01 cfunct3=011 crs1rd=_
+    //    name=c_lui decomp=lui rd=crs1rd u_imm=cimmui
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=00
+    //    name=c_srli decomp=srli rd=crs1rdq rs1=crs1rdq shamt=cimmsh6
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=01
+    //    name=c_srai decomp=srai rd=crs1rdq rs1=crs1rdq shamt=cimmsh6
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=10
+    //    name=c_andi decomp=andi rd=crs1rdq rs1=crs1rdq i_imm=cimmi
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=11 cfunct4_l0=0 crs2_h2=00
+    //    name=c_sub decomp=sub rd=crs1rdq rs1=crs1rdq rs2=crs2q
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=11 cfunct4_l0=0 crs2_h2=01
+    //    name=c_xor decomp=xor rd=crs1rdq rs1=crs1rdq rs2=crs2q
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=11 cfunct4_l0=0 crs2_h2=10
+    //    name=c_or decomp=or rd=crs1rdq rs1=crs1rdq rs2=crs2q
+    //
+    //% cquad=01 cfunct3=100 crs1rd_h2=11 cfunct4_l0=0 crs2_h2=11
+    //    name=c_and decomp=and rd=crs1rdq rs1=crs1rdq rs2=crs2q
+    //
+    //% cquad=01 cfunct3=101
+    //    name=c_j decomp=jal rd=crx0 j_imm=cimmj
+    //
+    //% cquad=01 cfunct3=110
+    //    name=c_beqz decomp=beq rs1=crs1rdq rs2=crx0 b_imm=cimmb
+    //
+    //% cquad=01 cfunct3=111
+    //    name=c_bnez decomp=bne rs1=crs1rdq rs2=crx0 b_imm=cimmb
+    //
+    //% cquad=10 cfunct3=000
+    //    name=c_slli decomp=slli rd=crs1rd rs1=crs1rd shamt=cimmsh6
+    //
+    //% cquad=10 cfunct3=001
+    //    name=c_fldsp decomp=fld rd=crs1rd rs1=crsp i_imm=cimmldsp
+    //
+    //% cquad=10 cfunct3=010
+    //    name=c_lwsp decomp=lw rd=crs1rd rs1=crsp i_imm=cimmlwsp
+    //
+    //% cquad=10 cfunct3=011
+    //    name=c_flwsp decomp=flw rd=crs1rd rs1=crsp i_imm=cimmlwsp
+    //
+    //% cquad=10 cfunct3=100 cfunct4_l0=0 crs2=0_0000
+    //    name=c_jr decomp=jalr rd=crx0 rs1=crs1rd i_imm=czero
+    //
+    //% cquad=10 cfunct3=100 cfunct4_l0=0 crs2=_
+    //    name=c_mv decomp=addi rd=crs1rd rs1=crs2 i_imm=czero
+    //
+    //% cquad=10 cfunct3=100 cfunct4_l0=1 crs2=0_0000 crs1rd=0_0000
+    //    name=c_ebreak decomp=ebreak
+    //
+    //% cquad=10 cfunct3=100 cfunct4_l0=1 crs2=0_0000 crs1rd=_
+    //    name=c_jalr decomp=jalr rd=crra rs1=crs1rd i_imm=czero
+    //
+    //% cquad=10 cfunct3=100 cfunct4_l0=1 crs2=_
+    //    name=c_add decomp=add rd=crs1rd rs1=crs1rd rs2=crs2
+    //
+    //% cquad=10 cfunct3=101
+    //    name=c_fsdsp decomp=fsd rs1=crsp rs2=crs2 s_imm=cimmsdsp
+    //
+    //% cquad=10 cfunct3=110
+    //    name=c_swsp decomp=sw rs1=crsp rs2=crs2 s_imm=cimmswsp
+    //
+    //% cquad=10 cfunct3=111
+    //    name=c_fswsp decomp=fsw rs1=crsp rs2=crs2 s_imm=cimmswsp
 }

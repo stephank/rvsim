@@ -1,11 +1,11 @@
 /// Finish an instruction, progressing the PC.
 macro_rules! end_op {
     ( $interp:expr ) => ({
-        $interp.state.pc += 4;
+        $interp.state.pc += $interp.instsz;
         return Ok(());
     });
     ( $interp:expr , $name:ident ) => ({
-        $interp.state.pc += 4;
+        $interp.state.pc += $interp.instsz;
         return Err(CpuError::$name);
     });
 }
@@ -14,8 +14,17 @@ macro_rules! end_op {
 macro_rules! end_jump_op {
     ( $interp:expr , $pc:expr ) => ({
         let pc = $pc;
-        if pc % 4 != 0 {
-            return Err(CpuError::MisalignedFetch);
+        #[cfg(feature = "rv32c")]
+        {
+            if pc % 2 != 0 {
+                return Err(CpuError::MisalignedFetch);
+            }
+        }
+        #[cfg(not(feature = "rv32c"))]
+        {
+            if pc % 4 != 0 {
+                return Err(CpuError::MisalignedFetch);
+            }
         }
 
         $interp.state.pc = pc;
@@ -27,8 +36,17 @@ macro_rules! end_jump_op {
 macro_rules! end_branch_op {
     ( $interp:expr , $imm:expr ) => ({
         let pc = $interp.state.pc.wrapping_add($imm as u32);
-        if pc % 4 != 0 {
-            return Err(CpuError::MisalignedFetch);
+        #[cfg(feature = "rv32c")]
+        {
+            if pc % 2 != 0 {
+                return Err(CpuError::MisalignedFetch);
+            }
+        }
+        #[cfg(not(feature = "rv32c"))]
+        {
+            if pc % 4 != 0 {
+                return Err(CpuError::MisalignedFetch);
+            }
         }
 
         $interp.state.pc = pc;
