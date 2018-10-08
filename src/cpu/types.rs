@@ -154,7 +154,7 @@ pub trait Clock {
     ///
     /// Note that, even though these values are 64-bit, it is recommended implementations use
     /// `wrapping_add`.
-    fn progress(&self, op: &Op);
+    fn progress(&mut self, op: &Op);
 
     /// Check execution quotas. Called at the very start of `Interp::step`.
     ///
@@ -198,7 +198,7 @@ impl Clock for SimpleClock {
         self.instret
     }
 
-    fn progress(&self, _op: &Op) {
-        self.instret.wrapping_add(1);
+    fn progress(&mut self, _op: &Op) {
+        self.instret = self.instret.wrapping_add(1);
     }
 }
