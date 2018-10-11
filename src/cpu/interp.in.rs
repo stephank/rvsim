@@ -460,7 +460,7 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //% opcode=001_0011 funct3=001 shtype=000_0000
     fn slli(&mut self, rd: usize, rs1: usize, shamt: u32) -> CpuExit {
         write_rd!(self, rd, {
-            self.state.x[rs1] << shamt
+            self.state.x[rs1].wrapping_shl(shamt)
         });
         end_op!(self)
     }
