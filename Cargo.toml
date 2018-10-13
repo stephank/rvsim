@@ -17,8 +17,10 @@ exclude = [
 ]
 
 [features]
+default = ["rv32fd"]
 serialize = ["serde", "serde_derive"]
 rv32c = []
+rv32fd = []
 
 [dependencies]
 serde = { version = "1.0", optional = true }

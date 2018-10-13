@@ -15,10 +15,15 @@ matrix:
 
 script:
     - cargo build --verbose
+    - cargo build --verbose --features="rv32c"
+    - cargo build --verbose --no-default-features
+    - cargo build --verbose --no-default-features --features="rv32c"
 
     # FIXME: Get a RISC-V toolchain on Travis somehow?
     # - cargo test --verbose
     # - cargo test --verbose --features="rv32c"
+    # - cargo test --verbose --no-default-features
+    # - cargo test --verbose --no-default-features --features="rv32c"
 
     # FIXME: Fails to link tests on Travis, works locally.
     # - |

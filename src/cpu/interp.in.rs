@@ -6,7 +6,9 @@
 
 use ::cpu::op::Op;
 use ::cpu::types::{Clock, CpuError, CpuState, Memory, MemoryAccess};
+#[cfg(feature = "rv32fd")]
 use ::softfloat::{self as sf, Sf32, Sf64};
+#[cfg(feature = "rv32fd")]
 use std::num::FpCategory;
 
 type CpuExit = Result<(), CpuError>;
@@ -878,6 +880,7 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //
     // "F" Standard Extension for Single-Precision Floating-Point
     //
+    //f{
 
     //% opcode=000_0111 funct3=010
     fn flw(&mut self, rd: usize, rs1: usize, i_imm: i32) -> CpuExit {
@@ -1500,6 +1503,7 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
             }
         } });
     }
+    //f}
 
     //
     // "C" Standard Extension for Compressed Instructions, Version 2.0
@@ -1511,23 +1515,11 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //% cquad=00 cfunct3=000 cimm4spn=_
     //    name=c_addi4spn decomp=addi rd=crs2q rs1=crsp i_imm=cimm4spn
     //
-    //% cquad=00 cfunct3=001
-    //    name=c_fld decomp=fld rd=crs2q rs1=crs1rdq i_imm=cimmd
-    //
     //% cquad=00 cfunct3=010
     //    name=c_lw decomp=lw rd=crs2q rs1=crs1rdq i_imm=cimmw
     //
-    //% cquad=00 cfunct3=011
-    //    name=c_flw decomp=flw rd=crs2q rs1=crs1rdq i_imm=cimmw
-    //
-    //% cquad=00 cfunct3=101
-    //    name=c_fsd decomp=fsd rs1=crs1rdq rs2=crs2q s_imm=cimmd
-    //
     //% cquad=00 cfunct3=110
     //    name=c_sw decomp=sw rs1=crs1rdq rs2=crs2q s_imm=cimmw
-    //
-    //% cquad=00 cfunct3=111
-    //    name=c_fsw decomp=fsw rs1=crs1rdq rs2=crs2q s_imm=cimmw
     //
     //% cquad=01 cfunct3=000
     //    name=c_addi decomp=addi rd=crs1rd rs1=crs1rd i_imm=cimmi
@@ -1577,14 +1569,8 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //% cquad=10 cfunct3=000
     //    name=c_slli decomp=slli rd=crs1rd rs1=crs1rd shamt=cimmsh6
     //
-    //% cquad=10 cfunct3=001
-    //    name=c_fldsp decomp=fld rd=crs1rd rs1=crsp i_imm=cimmldsp
-    //
     //% cquad=10 cfunct3=010
     //    name=c_lwsp decomp=lw rd=crs1rd rs1=crsp i_imm=cimmlwsp
-    //
-    //% cquad=10 cfunct3=011
-    //    name=c_flwsp decomp=flw rd=crs1rd rs1=crsp i_imm=cimmlwsp
     //
     //% cquad=10 cfunct3=100 cfunct4_l0=0 crs2=0_0000
     //    name=c_jr decomp=jalr rd=crx0 rs1=crs1rd i_imm=czero
@@ -1601,12 +1587,32 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     //% cquad=10 cfunct3=100 cfunct4_l0=1 crs2=_
     //    name=c_add decomp=add rd=crs1rd rs1=crs1rd rs2=crs2
     //
-    //% cquad=10 cfunct3=101
-    //    name=c_fsdsp decomp=fsd rs1=crsp rs2=crs2 s_imm=cimmsdsp
-    //
     //% cquad=10 cfunct3=110
     //    name=c_swsp decomp=sw rs1=crsp rs2=crs2 s_imm=cimmswsp
     //
+    //f{
+    //% cquad=00 cfunct3=001
+    //    name=c_fld decomp=fld rd=crs2q rs1=crs1rdq i_imm=cimmd
+    //
+    //% cquad=00 cfunct3=011
+    //    name=c_flw decomp=flw rd=crs2q rs1=crs1rdq i_imm=cimmw
+    //
+    //% cquad=00 cfunct3=101
+    //    name=c_fsd decomp=fsd rs1=crs1rdq rs2=crs2q s_imm=cimmd
+    //
+    //% cquad=00 cfunct3=111
+    //    name=c_fsw decomp=fsw rs1=crs1rdq rs2=crs2q s_imm=cimmw
+    //
+    //% cquad=10 cfunct3=001
+    //    name=c_fldsp decomp=fld rd=crs1rd rs1=crsp i_imm=cimmldsp
+    //
+    //% cquad=10 cfunct3=011
+    //    name=c_flwsp decomp=flw rd=crs1rd rs1=crsp i_imm=cimmlwsp
+    //
+    //% cquad=10 cfunct3=101
+    //    name=c_fsdsp decomp=fsd rs1=crsp rs2=crs2 s_imm=cimmsdsp
+    //
     //% cquad=10 cfunct3=111
     //    name=c_fswsp decomp=fsw rs1=crsp rs2=crs2 s_imm=cimmswsp
+    //f}
 }
