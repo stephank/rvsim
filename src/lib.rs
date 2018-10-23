@@ -1,7 +1,7 @@
 #![warn(missing_docs)]
 #![cfg_attr(feature = "cargo-clippy", allow(doc_markdown))]
 
-//! A RISC-V simulator implementing RV32G.
+//! A RISC-V simulator implementing RV32G[C].
 //!
 //! ## Usage
 //!

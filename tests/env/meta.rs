@@ -1,4 +1,7 @@
 const ISA_TESTS: &[(&str, &str)] = &[
+    #[cfg(feature = "rv32c")]
+    ("rv32uc", "rvc"),
+
     ("rv32ui", "add"),
     ("rv32ui", "addi"),
     ("rv32ui", "and"),

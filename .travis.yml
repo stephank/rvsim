@@ -18,6 +18,7 @@ script:
 
     # FIXME: Get a RISC-V toolchain on Travis somehow?
     # - cargo test --verbose
+    # - cargo test --verbose --features="rv32c"
 
     # FIXME: Fails to link tests on Travis, works locally.
     # - |

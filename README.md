@@ -4,7 +4,7 @@
 [![Crate](https://img.shields.io/crates/v/rvsim.svg)](https://crates.io/crates/rvsim)
 [![Build Status](https://travis-ci.org/stephank/rvsim.svg?branch=master)](https://travis-ci.org/stephank/rvsim)
 
-A RISC-V simulator implementing RV32G, written in Rust.
+A RISC-V simulator implementing RV32G[C], written in Rust.
 
 See the [documentation] for usage.
 
@@ -14,6 +14,11 @@ See the [documentation] for usage.
 
  - Supports only little-endian hosts.
  - Windows support needs work.
+
+## Features
+
+- `serialize` enable serialization support
+- `rv32c` enable RV32C compressed instruction set support
 
 ## License
 
