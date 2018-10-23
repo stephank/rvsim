@@ -33,8 +33,6 @@ pub struct Interp<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> {
 
 impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
     /// Create a new interpreter.
-    ///
-    /// This is just a short-hand; fields may also be set directly.
     pub fn new(state: &'s mut CpuState, mem: &'m mut M, clock: &'c mut C) -> Self {
         Self { state, mem, clock, instsz: 4 }
     }
