@@ -1,16 +1,19 @@
 [package]
 name = "rvsim"
 version = "0.1.0"
-authors = ["Stéphan Kochen <stephan@kochen.nl>"]
-description = "A RISC-V simulator implementing RV32G."
+authors = [
+  "Stéphan Kochen <stephan@kochen.nl>",
+  "Wladimir J. van der Laan <laanwj@gmail.com>",
+]
+description = "A RISC-V simulator implementing RV32G[C]."
 license = "MIT"
 categories = ["emulators"]
 repository = "https://github.com/stephank/rvsim"
 build = "build/main.rs"
 exclude = [
-    ".*",
-    "tests/*",
-    "vendor/riscv-tests/*",
+  ".*",
+  "tests/*",
+  "vendor/riscv-tests/*",
 ]
 
 [features]
