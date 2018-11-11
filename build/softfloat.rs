@@ -1,4 +1,4 @@
-use gcc::Build;
+use cc::Build;
 
 const SOURCE_DIR: &str = "vendor/SoftFloat-3e/source";
 
