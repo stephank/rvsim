@@ -185,7 +185,7 @@ impl<'a> Elf32<'a> {
         }
 
         let header: &'a ElfHeader32 = unsafe {
-            transmute(data.as_ptr().offset(size_of::<ElfIdent>() as isize))
+            transmute(data.as_ptr().add(size_of::<ElfIdent>()))
         };
         if header.version != ELF_VERSION_CURRENT {
             let header_version = header.version;
