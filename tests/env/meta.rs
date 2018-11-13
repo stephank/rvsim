@@ -62,27 +62,48 @@ const ISA_TESTS: &[(&str, &str)] = &[
     ("rv32ua", "amoxor_w"),
     ("rv32ua", "lrsc"),
 
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fadd"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fclass"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fcmp"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fcvt"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fcvt_w"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fdiv"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fmadd"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "fmin"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "ldst"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "move"),
+    #[cfg(feature = "rv32fd")]
     ("rv32uf", "recoding"),
 
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fadd"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fclass"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fcmp"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fcvt"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fcvt_w"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fdiv"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fmadd"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "fmin"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "ldst"),
     // ("rv32ud", "move"),
+    #[cfg(feature = "rv32fd")]
     ("rv32ud", "recoding"),
 ];

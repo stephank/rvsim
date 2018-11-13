@@ -99,6 +99,7 @@ extern crate serde_derive;
 mod cpu;
 
 pub mod elf;
+#[cfg(feature = "rv32fd")]
 pub mod softfloat;
 
 pub use cpu::*;

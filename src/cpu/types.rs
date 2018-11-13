@@ -1,4 +1,5 @@
 use ::cpu::op::Op;
+#[cfg(feature = "rv32fd")]
 use ::softfloat::Sf64;
 use std::mem::size_of;
 
@@ -64,6 +65,7 @@ pub struct CpuState {
     pub x: [u32; 32],
 
     /// Floating-point registers.
+    #[cfg(feature = "rv32fd")]
     pub f: [Sf64; 32],
 
     /// Program counter.
@@ -85,6 +87,7 @@ impl CpuState {
     pub fn new(pc: u32) -> Self {
         CpuState {
             x: [0; 32],
+            #[cfg(feature = "rv32fd")]
             f: [Sf64(0); 32],
             pc,
             fcsr: 0,

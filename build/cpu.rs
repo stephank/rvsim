@@ -61,6 +61,39 @@ fn build_parse_tree(parse_tree: &mut ParseNode, matchers: &Vec<(&str, &str)>, fi
     }
 }
 
+// Struct for selectively skipping rv32fd opcodes if rv32fd feature is disabled
+struct SkipDisabled {
+    #[cfg(not(feature = "rv32fd"))]
+    only_rv32fd: bool,
+}
+
+impl SkipDisabled {
+    pub fn new() -> Self {
+        Self {
+            #[cfg(not(feature = "rv32fd"))]
+            only_rv32fd: false,
+        }
+    }
+
+    #[cfg(not(feature = "rv32fd"))]
+    pub fn do_skip(&mut self, line: &str) -> bool {
+        if line.starts_with("//f{") {
+            self.only_rv32fd = true;
+            true
+        } else if line.starts_with("//f}") {
+            self.only_rv32fd = false;
+            true
+        } else {
+            self.only_rv32fd
+        }
+    }
+
+    #[cfg(feature = "rv32fd")]
+    pub fn do_skip(&mut self, _line: &str) -> bool {
+        false
+    }
+}
+
 pub fn build() {
     println!("# generating cpu code");
 
@@ -83,8 +116,13 @@ pub fn build() {
     // Read `interp.in.rs` by line, keeping the previous line aruond.
     let reader = BufReader::new(File::open("src/cpu/interp.in.rs").unwrap());
     let mut prev = String::new();
+    let mut skipper = SkipDisabled::new();
     for line in reader.lines() {
         let line = line.unwrap().trim().to_owned();
+
+        if skipper.do_skip(&line) {
+            continue;
+        }
 
         if prev.starts_with("//% ") && line.starts_with("fn ") {
             // Extract the method name and argument names.
@@ -238,9 +276,16 @@ pub fn build() {
     // Generate the `interp.rs`.
     let reader = BufReader::new(File::open("src/cpu/interp.in.rs").unwrap());
     let mut file = File::create(out_path.join("interp.rs")).unwrap();
+    let mut skipper = SkipDisabled::new();
     for line in reader.lines() {
         let line = line.unwrap();
-        match line.trim() {
+        let line_trim = line.trim();
+
+        if skipper.do_skip(&line_trim) {
+            continue;
+        }
+
+        match line_trim {
             "//% dispatch" => file.write_all(dispatch_src.as_bytes()),
             _ => writeln!(file, "{}", line),
         }.unwrap();

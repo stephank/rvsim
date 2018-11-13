@@ -90,6 +90,7 @@ macro_rules! amo {
 
 /// Wrap a block with a prepared softfloat environment.
 /// Handles exception flags and rounding mode.
+#[cfg(feature = "rv32fd")]
 macro_rules! sf_wrap {
     ( $interp:expr , $rm:expr , $code:block ) => ({
         unsafe {
@@ -120,6 +121,7 @@ macro_rules! sf_wrap {
 
 /// Perform a softfloat calculation, writing the result to `$rd`.
 /// Uses `sf_wrap` to prepare the environment.
+#[cfg(feature = "rv32fd")]
 macro_rules! sf_calc {
     ( $interp:expr , $rd:expr , $code:block ) => ({
         $interp.state.f[$rd] = sf_wrap!($interp, $code);
