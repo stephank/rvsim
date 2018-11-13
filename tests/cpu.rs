@@ -51,10 +51,11 @@ fn build_riscv_tests() {
         }
 
         let in_file = format!("{}/{}.S", set, name);
-        let mut cmd = Command::new("riscv64-unknown-elf-gcc");
+        let mut cmd = Command::new("riscv64-linux-gnu-gcc-8");
         cmd.args(&[
             "-march=rv32g",
             "-mabi=ilp32",
+            "-nostdlib",
             "-nostartfiles",
             "-I./../../../tests/env",
             "-I./macros/scalar",
