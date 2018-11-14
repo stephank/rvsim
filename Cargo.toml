@@ -1,6 +1,6 @@
 [package]
 name = "rvsim"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
   "Stéphan Kochen <stephan@kochen.nl>",
   "Wladimir J. van der Laan <laanwj@gmail.com>",
