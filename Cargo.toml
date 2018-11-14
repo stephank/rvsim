@@ -31,7 +31,7 @@ rayon = "1.0"
 
 [build-dependencies]
 cc = "1.0"
-regex = "0.2"
+regex = "1.0"
 
 [package.metadata.docs.rs]
 all-features = true 

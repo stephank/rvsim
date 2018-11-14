@@ -125,27 +125,27 @@ impl From<Sf64> for f32 {
 
 extern "C" {
     /// Get the exception flags from thread-local storage.
-    #[link_name = "\u{1}_softfloat_getFlags"]
+    #[link_name = "softfloat_getFlags"]
     pub fn get_flags() -> u8;
     /// Set the exception flags.
-    #[link_name = "\u{1}_softfloat_setFlags"]
+    #[link_name = "softfloat_setFlags"]
     pub fn set_flags(arg1: u8);
     /// Add to the exception flags.
-    #[link_name = "\u{1}_softfloat_raiseFlags"]
+    #[link_name = "softfloat_raiseFlags"]
     pub fn raise_flags(arg1: u8);
 
     /// Get the current rounding mode from thread-local storage.
-    #[link_name = "\u{1}_softfloat_getRoundingMode"]
+    #[link_name = "softfloat_getRoundingMode"]
     pub fn get_rounding_mode() -> u8;
     /// Set the rounding mode.
-    #[link_name = "\u{1}_softfloat_setRoundingMode"]
+    #[link_name = "softfloat_setRoundingMode"]
     pub fn set_rounding_mode(arg1: u8);
 
     /// Convert a `u32` to a single-precision value.
-    #[link_name = "\u{1}_ui32_to_f32"]
+    #[link_name = "ui32_to_f32"]
     pub fn u32_to_f32(arg1: u32) -> Sf32;
     /// Convert a `u32` to a double-precision value.
-    #[link_name = "\u{1}_ui32_to_f64"]
+    #[link_name = "ui32_to_f64"]
     pub fn u32_to_f64(arg1: u32) -> Sf64;
     /// Convert an `i32` to a single-precision value.
     pub fn i32_to_f32(arg1: i32) -> Sf32;
@@ -153,7 +153,7 @@ extern "C" {
     pub fn i32_to_f64(arg1: i32) -> Sf64;
 
     /// Convert a single-precision value to a `u32`.
-    #[link_name = "\u{1}_f32_to_ui32"]
+    #[link_name = "f32_to_ui32"]
     pub fn f32_to_u32(arg1: Sf32, arg2: u8, arg3: bool) -> u32;
     /// Convert a single-precision value to an `i32`.
     pub fn f32_to_i32(arg1: Sf32, arg2: u8, arg3: bool) -> i32;
@@ -180,11 +180,11 @@ extern "C" {
     /// Test less-than with single-precision values.
     pub fn f32_lt(arg1: Sf32, arg2: Sf32) -> bool;
     /// Whether the single-precision value is a signalling NaN.
-    #[link_name = "\u{1}_f32_isSignalingNaN"]
+    #[link_name = "f32_isSignalingNaN"]
     pub fn f32_is_signaling_nan(arg1: Sf32) -> bool;
 
     /// Convert a double-precision value to a `u32`.
-    #[link_name = "\u{1}_f64_to_ui32"]
+    #[link_name = "f64_to_ui32"]
     pub fn f64_to_u32(arg1: Sf64, arg2: u8, arg3: bool) -> u32;
     /// Convert a double-precision value to an `i32`.
     pub fn f64_to_i32(arg1: Sf64, arg2: u8, arg3: bool) -> i32;
@@ -211,6 +211,6 @@ extern "C" {
     /// Test less-than with double-precision values.
     pub fn f64_lt(arg1: Sf64, arg2: Sf64) -> bool;
     /// Whether the double-precision value is a signalling NaN.
-    #[link_name = "\u{1}_f64_isSignalingNaN"]
+    #[link_name = "f64_isSignalingNaN"]
     pub fn f64_is_signaling_nan(arg1: Sf64) -> bool;
 }
