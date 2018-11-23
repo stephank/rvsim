@@ -39,7 +39,7 @@
 //!
 //! /// Our implementation of `Memory` builds a simple memory map.
 //! ///
-//! /// The `Memory` trait is also implemented for `[u8]`, so we can simple delegate to it, after
+//! /// The `Memory` trait is also implemented for `[u8]`, so we can simply delegate to it, after
 //! /// translating the address.
 //! ///
 //! /// The condition here only checks the start address of DRAM, because the upper bound is
