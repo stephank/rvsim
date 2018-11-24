@@ -23,6 +23,6 @@ See the [documentation] for usage.
 
 ## License
 
-Rvsim uses the MIT license, but includes portions of Berkeley SoftFloat, which
-uses the BSD 3-clause license. For details, see the [COPYING.md](./COPYING.md)
-file.
+Rvsim uses the MIT license, but includes portions of Berkeley SoftFloat, used
+when the 'rv32fd' feature is enabled (default). Berkely SoftFloat uses the BSD
+3-clause license. For details, see the [COPYING.md](./COPYING.md) file.
