@@ -96,6 +96,7 @@
 #[macro_use]
 extern crate serde_derive;
 
+#[allow(unused_parens)]
 mod cpu;
 
 pub mod elf;
