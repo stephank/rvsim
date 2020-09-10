@@ -1,5 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(
-        cast_lossless, cyclomatic_complexity, new_without_default_derive))]
+#![allow(clippy::cast_lossless, clippy::cognitive_complexity, clippy::new_without_default)]
 
 #[macro_use]
 mod macros;
