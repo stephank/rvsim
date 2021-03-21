@@ -81,16 +81,16 @@
 //! ```
 //!
 //! ## Current limitations
-//! 
+//!
 //!  - Supports only little-endian hosts.
 //!  - Windows support needs work.
-//! 
+//!
 //! ## License
-//! 
+//!
 //! Rvsim uses the MIT license, but includes portions of Berkeley SoftFloat, which
 //! uses the BSD 3-clause license. For details, see the [COPYING.md] file.
 //!
-//!  [COPYING.md]: https://github.com/stephank/rvsim/blob/master/COPYING.md
+//!  [COPYING.md]: https://github.com/stephank/rvsim/blob/main/COPYING.md
 
 #[cfg(feature = "serialize")]
 #[macro_use]
