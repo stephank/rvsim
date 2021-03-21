@@ -256,11 +256,12 @@ impl<'s, 'm, 'c, M: 'm + Memory, C: 'c + Clock> Interp<'s, 'm, 'c, M, C> {
 
     //% opcode=110_0111 funct3=000
     fn jalr(&mut self, rd: usize, rs1: usize, i_imm: i32) -> CpuExit {
+        let dst_base = self.state.x[rs1];
         write_rd!(self, rd, {
             self.state.pc.wrapping_add(self.instsz)
         });
         end_jump_op!(self, {
-            self.state.x[rs1].wrapping_add(i_imm as u32)
+            dst_base.wrapping_add(i_imm as u32)
         })
     }
 
