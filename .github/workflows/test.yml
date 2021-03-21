@@ -1,0 +1,57 @@
+on: [push, pull_request]
+name: Test
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Install GCC
+        run: |
+          sudo apt-get install -y --no-install-recommends \
+            gcc-8-riscv64-linux-gnu
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
+
+      - name: Test RV32G
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose
+
+      - name: Test RV32GC
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose --features=rv32c
+
+      - name: Test RV32IMA
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose --no-default-features
+
+      - name: Test RV32IMAC
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose --no-default-features --features=rv32c

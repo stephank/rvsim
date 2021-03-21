@@ -26,7 +26,7 @@ enum ParseAction {
 }
 
 /** Build the parse tree. */
-fn build_parse_tree(parse_tree: &mut ParseNode, matchers: &Vec<(&str, &str)>, first_field: &str, variant: Rc<Variant>) {
+fn build_parse_tree(parse_tree: &mut ParseNode, matchers: &[(&str, &str)], first_field: &str, variant: Rc<Variant>) {
     let mut node = parse_tree;
     let mut prev_value = {
         let (field, value) = matchers[0];
@@ -41,11 +41,11 @@ fn build_parse_tree(parse_tree: &mut ParseNode, matchers: &Vec<(&str, &str)>, fi
                 actions: HashMap::new(),
             })
         }) {
-            &mut ParseAction::Descend(ref mut next_node) => {
+            ParseAction::Descend(ref mut next_node) => {
                 assert_eq!(next_node.field, next_field, "parser field order must match");
                 node = next_node;
             },
-            &mut ParseAction::Finish(_) => {
+            ParseAction::Finish(_) => {
                 panic!("parser tried to descend into existing match");
             },
         }
@@ -216,10 +216,10 @@ pub fn build() {
                 src.push_str(&format!("{}    0b{} => {{\n", spaces, value));
             }
             match action {
-                &ParseAction::Descend(ref child) => {
+                ParseAction::Descend(ref child) => {
                     src.push_str(&node_parse_src(child, indent + 8));
                 },
-                &ParseAction::Finish(ref variant) => {
+                ParseAction::Finish(ref variant) => {
                     if variant.method == "illegal" {
                         src.push_str(&format!("{}        None\n", spaces));
                     } else {

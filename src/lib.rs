@@ -1,5 +1,5 @@
 #![warn(missing_docs)]
-#![cfg_attr(feature = "cargo-clippy", allow(doc_markdown))]
+#![allow(clippy::doc_markdown)]
 
 //! A RISC-V simulator implementing RV32G[C].
 //!
@@ -39,7 +39,7 @@
 //!
 //! /// Our implementation of `Memory` builds a simple memory map.
 //! ///
-//! /// The `Memory` trait is also implemented for `[u8]`, so we can simple delegate to it, after
+//! /// The `Memory` trait is also implemented for `[u8]`, so we can simply delegate to it, after
 //! /// translating the address.
 //! ///
 //! /// The condition here only checks the start address of DRAM, because the upper bound is
@@ -96,6 +96,7 @@
 #[macro_use]
 extern crate serde_derive;
 
+#[allow(unused_parens)]
 mod cpu;
 
 pub mod elf;

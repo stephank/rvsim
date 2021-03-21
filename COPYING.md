@@ -9,7 +9,8 @@ The following files are based on Berkeley SoftFloat release 3e:
 These files are subject to the BSD 3-clause license described in
 `vendor/SoftFloat-3e/COPYING.txt`.
 
-Code from these files is used to produce the final build product of rvsim.
+Code from these files is used to produce the final build product of rvsim
+when the 'rv32fd' feature is enabled (default).
 
 ### riscv-tests
 

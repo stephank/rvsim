@@ -1,5 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(
-        cast_lossless, transmute_ptr_to_ref))]
+#![allow(clippy::cast_lossless, clippy::transmute_ptr_to_ref)]
 
 //! A simple copy-free ELF parser.
 //!
