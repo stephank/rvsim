@@ -1,7 +1,11 @@
+use std::mem::size_of;
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 use crate::cpu::op::Op;
 #[cfg(feature = "rv32fd")]
 use crate::softfloat::Sf64;
-use std::mem::size_of;
 
 /// Statuses with which virtual CPU execution may stop.
 ///
@@ -57,9 +61,9 @@ pub enum CpuError {
 
 /// Struct containing all virtual CPU state.
 ///
-/// With the `serialize` crate feature, this structure is serializable using Serde.
+/// With the `serde` feature, this structure is serializable using Serde.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CpuState {
     /// Integer registers.
     pub x: [u32; 32],
@@ -175,9 +179,9 @@ pub trait Clock {
 /// This implementation only counts instructions. The CSRs `cycle`, `time`, and `instret` all
 /// return the same counter to create a very basic simulation of time.
 ///
-/// With the `serialize` crate feature, this structure is serializable using Serde.
+/// With the `serde` feature, this structure is serializable using Serde.
 #[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SimpleClock {
     /// Instruction counter CSR.
     pub instret: u64,

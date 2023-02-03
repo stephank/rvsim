@@ -10,8 +10,8 @@
 //! `Memory` and `Clock` are traits, allowing complete control over the structure of the rest of
 //! the virtual machine.
 //!
-//! When using the crate feature `serialize`, a `CpuState` can be serialized (and deserialized) in
-//! order to suspend a virtual machine to persistent storage.
+//! When using the feature `serde`, a `CpuState` can be serialized (and deserialized) in order to
+//! suspend a virtual machine to persistent storage.
 //!
 //! A very basic ELF parser is also provided in the `elf` module. Rvsim itself uses this parser to
 //! run the official RISC-V test suite.
@@ -91,10 +91,6 @@
 //! uses the BSD 3-clause license. For details, see the [COPYING.md] file.
 //!
 //!  [COPYING.md]: https://github.com/stephank/rvsim/blob/main/COPYING.md
-
-#[cfg(feature = "serialize")]
-#[macro_use]
-extern crate serde_derive;
 
 #[allow(unused_parens)]
 mod cpu;

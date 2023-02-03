@@ -16,9 +16,9 @@ See the [documentation] for usage.
 
 ## Features
 
-- `serialize` enable serialization support
 - `rv32c` enable RV32C compressed instruction set support
 - `rv32fd` enables RV32F (Single-Precision Floating-Point) and RV32F (Double-Precision Floating-Point) instruction set support (default)
+- `serde` enable serialization support
 
 ## License
 

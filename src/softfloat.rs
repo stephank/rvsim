@@ -8,6 +8,9 @@
 
 use std::mem::transmute;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Round to nearest, ties to even.
 pub const ROUND_NEAR_EVEN: u8 = 0;
 /// Round towards 0.
@@ -32,10 +35,10 @@ pub const FLAG_INVALID: u8 = 16;
 
 /// A single-precision soft-float. Internally represented as `u32`.
 ///
-/// With the `serialize` crate feature, this structure is serializable using Serde.
+/// With the `serde` feature, this structure is serializable using Serde.
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Sf32(pub u32);
 
 impl Sf32 {
@@ -64,10 +67,10 @@ impl From<Sf32> for f32 {
 
 /// A double-precision soft-float. Internally represented as `u64`.
 ///
-/// With the `serialize` crate feature, this structure is serializable using Serde.
+/// With the `serde` feature, this structure is serializable using Serde.
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Sf64(pub u64);
 
 impl Sf64 {
