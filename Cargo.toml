@@ -18,7 +18,7 @@ exclude = [
 edition = "2021"
 
 [features]
-default = ["rv32fd"]
+default = ["rv32c", "rv32fd"]
 serialize = ["serde", "serde_derive"]
 rv32c = []
 rv32fd = []
