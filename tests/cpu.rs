@@ -53,7 +53,7 @@ fn build_riscv_tests() {
         }
 
         let in_file = format!("{}/{}.S", set, name);
-        let mut cmd = Command::new("riscv64-linux-gnu-gcc-8");
+        let mut cmd = Command::new("riscv32-none-elf-gcc");
         cmd.args(&[
             "-static",
             "-march=rv32g",
@@ -63,6 +63,7 @@ fn build_riscv_tests() {
             "-I./../../../tests/env",
             "-I./macros/scalar",
             "-T./../../../tests/env/link.ld",
+            "-Wl,--no-warn-rwx-segments",
             "-o",
             &out_file.to_string_lossy(),
             &in_file,

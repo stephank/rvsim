@@ -1,57 +1,40 @@
-on: [push, pull_request]
 name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Install GCC
-        run: |
-          sudo apt-get install -y --no-install-recommends \
-            gcc-8-riscv64-linux-gnu
+      - uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Cache
-        uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
 
-      - name: Clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
-
-      - name: Test RV32G
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --verbose
-
-      - name: Test RV32GC
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --verbose --features=rv32c
-
-      - name: Test RV32IMA
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --verbose --no-default-features
-
-      - name: Test RV32IMAC
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --verbose --no-default-features --features=rv32c
+      - shell: nix-shell --pure --run 'bash -xeuo pipefail {0}'
+        run: |
+          cargo fmt --check
+          cargo clippy
+          cargo test --all-features
+          cargo test --no-default-features
+          cargo test --no-default-features --features=rv32c
+          cargo test --no-default-features --features=rv23c,rv32fd
+          cargo test --no-default-features --features=rv32fd
