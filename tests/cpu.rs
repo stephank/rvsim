@@ -54,7 +54,7 @@ fn build_riscv_tests() {
 
         let in_file = format!("{}/{}.S", set, name);
         let mut cmd = Command::new("riscv32-none-elf-gcc");
-        cmd.args(&[
+        cmd.args([
             "-static",
             "-march=rv32g",
             "-mabi=ilp32",

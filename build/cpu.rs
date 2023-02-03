@@ -135,7 +135,7 @@ pub fn build() {
 
         if prev.starts_with("//% ") && line.starts_with("fn ") {
             // Extract the method name and argument names.
-            let method = line[3..].splitn(2, '(').next().unwrap().to_owned();
+            let method = line[3..].split('(').next().unwrap().to_owned();
             let args = args_re
                 .captures_iter(&line)
                 .map(|c| (c[1].to_owned(), c[1].to_owned(), c[2].to_owned()))
@@ -155,12 +155,7 @@ pub fn build() {
             // Parse the matchers in the comment.
             let matchers = prev[4..]
                 .split_whitespace()
-                .map(|s| {
-                    let mut split = s.splitn(2, '=');
-                    let field = split.next().unwrap();
-                    let value = split.next().unwrap();
-                    (field, value)
-                })
+                .map(|s| s.split_once('=').unwrap())
                 .collect::<Vec<_>>();
 
             build_parse_tree(&mut parse_tree, &matchers, "opcode", variant);
@@ -171,23 +166,13 @@ pub fn build() {
             // Parse the matchers in the comment.
             let matchers = prev[4..]
                 .split_whitespace()
-                .map(|s| {
-                    let mut split = s.splitn(2, '=');
-                    let field = split.next().unwrap();
-                    let value = split.next().unwrap();
-                    (field, value)
-                })
+                .map(|s| s.split_once('=').unwrap())
                 .collect::<Vec<_>>();
 
             // Parse the metadata in the comment.
             let meta = line[6..]
                 .split_whitespace()
-                .map(|s| {
-                    let mut split = s.splitn(2, '=');
-                    let field = split.next().unwrap();
-                    let value = split.next().unwrap();
-                    (field, value)
-                })
+                .map(|s| s.split_once('=').unwrap())
                 .collect::<Vec<_>>();
 
             assert_eq!(
@@ -337,7 +322,7 @@ pub fn build() {
         let line = line.unwrap();
         let line_trim = line.trim();
 
-        if skipper.do_skip(&line_trim) {
+        if skipper.do_skip(line_trim) {
             continue;
         }
 
