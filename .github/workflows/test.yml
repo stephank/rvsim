@@ -29,12 +29,12 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - shell: nix-shell --pure --run 'bash -xeuo pipefail {0}'
+      - shell: nix-shell --pure --run "bash -xeuo pipefail {0}"
         run: |
           cargo fmt --check
           cargo clippy
           cargo test --all-features
           cargo test --no-default-features
           cargo test --no-default-features --features=rv32c
-          cargo test --no-default-features --features=rv23c,rv32fd
+          cargo test --no-default-features --features=rv32c,rv32fd
           cargo test --no-default-features --features=rv32fd
