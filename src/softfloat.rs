@@ -34,8 +34,8 @@ pub const FLAG_INVALID: u8 = 16;
 ///
 /// With the `serialize` crate feature, this structure is serializable using Serde.
 #[repr(C)]
-#[derive(Clone,Copy,Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize,Deserialize))]
+#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct Sf32(pub u32);
 
 impl Sf32 {
@@ -66,8 +66,8 @@ impl From<Sf32> for f32 {
 ///
 /// With the `serialize` crate feature, this structure is serializable using Serde.
 #[repr(C)]
-#[derive(Clone,Copy,Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize,Deserialize))]
+#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct Sf64(pub u64);
 
 impl Sf64 {

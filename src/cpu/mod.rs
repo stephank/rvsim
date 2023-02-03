@@ -1,4 +1,8 @@
-#![allow(clippy::cast_lossless, clippy::cognitive_complexity, clippy::new_without_default)]
+#![allow(
+    clippy::cast_lossless,
+    clippy::cognitive_complexity,
+    clippy::new_without_default
+)]
 
 #[macro_use]
 mod macros;

@@ -1,12 +1,12 @@
-use ::cpu::op::Op;
+use crate::cpu::op::Op;
 #[cfg(feature = "rv32fd")]
-use ::softfloat::Sf64;
+use crate::softfloat::Sf64;
 use std::mem::size_of;
 
 /// Statuses with which virtual CPU execution may stop.
 ///
 /// Some of these may be recovered from. For all errors, the effects are documented.
-#[derive(Clone,Copy,Debug,Eq,PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CpuError {
     /// Tried to branch or jump to an unaligned address.
     ///
@@ -58,8 +58,8 @@ pub enum CpuError {
 /// Struct containing all virtual CPU state.
 ///
 /// With the `serialize` crate feature, this structure is serializable using Serde.
-#[derive(Clone,Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize,Deserialize))]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct CpuState {
     /// Integer registers.
     pub x: [u32; 32],
@@ -125,7 +125,7 @@ impl Memory for [u8] {
             match access {
                 MemoryAccess::Load(dest) | MemoryAccess::Exec(dest) => {
                     unsafe { *dest = *ptr };
-                },
+                }
                 MemoryAccess::Store(value) => {
                     unsafe { *ptr = value };
                 }
@@ -165,7 +165,9 @@ pub trait Clock {
     /// allows the simulator to implement time slicing.
     ///
     /// This method is optional, and always returns `true` if not implemented.
-    fn check_quota(&self) -> bool { true }
+    fn check_quota(&self) -> bool {
+        true
+    }
 }
 
 /// A simple implementation of the `Clock` trait.
@@ -174,8 +176,8 @@ pub trait Clock {
 /// return the same counter to create a very basic simulation of time.
 ///
 /// With the `serialize` crate feature, this structure is serializable using Serde.
-#[derive(Clone,Copy,Debug)]
-#[cfg_attr(feature = "serialize", derive(Serialize,Deserialize))]
+#[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct SimpleClock {
     /// Instruction counter CSR.
     pub instret: u64,

@@ -36,7 +36,7 @@ trait ElfFileAddressable {
 }
 
 /// ELF identity header.
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 #[repr(packed)]
 pub struct ElfIdent {
     /// ELF magic value, matches `ELF_IDENT_MAGIC`.
@@ -56,7 +56,7 @@ pub struct ElfIdent {
 }
 
 /// ELF 32-bit header.
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 #[repr(packed)]
 pub struct ElfHeader32 {
     /// File type, one of `ELF_TYPE_*`.
@@ -88,7 +88,7 @@ pub struct ElfHeader32 {
 }
 
 /// ELF 32-bit program header.
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 #[repr(packed)]
 pub struct ElfProgramHeader32 {
     /// Type, a combination of `ELF_PROGRAM_TYPE_*`
@@ -115,7 +115,7 @@ impl ElfFileAddressable for ElfProgramHeader32 {
 }
 
 /// ELF 32-bit section header.
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 #[repr(packed)]
 pub struct ElfSectionHeader32 {
     /// Index in the string section containing the section name.
@@ -141,7 +141,14 @@ pub struct ElfSectionHeader32 {
 }
 impl ElfFileAddressable for ElfSectionHeader32 {
     fn get_range(&self) -> (u32, u32) {
-        (self.offset, if self.typ == ELF_SECTION_TYPE_NOBITS { 0 } else { self.size })
+        (
+            self.offset,
+            if self.typ == ELF_SECTION_TYPE_NOBITS {
+                0
+            } else {
+                self.size
+            },
+        )
     }
 }
 
@@ -169,9 +176,7 @@ impl<'a> Elf32<'a> {
             return Err("file too short to contain headers".to_owned());
         }
 
-        let ident: &'a ElfIdent = unsafe {
-            transmute(data.as_ptr())
-        };
+        let ident: &'a ElfIdent = unsafe { transmute(data.as_ptr()) };
         if u32::from_be(ident.magic) != ELF_IDENT_MAGIC {
             return Err("magic mismatch, likely not an ELF".to_owned());
         }
@@ -183,9 +188,8 @@ impl<'a> Elf32<'a> {
             return Err("only 32-bit class supported".to_owned());
         }
 
-        let header: &'a ElfHeader32 = unsafe {
-            transmute(data.as_ptr().add(size_of::<ElfIdent>()))
-        };
+        let header: &'a ElfHeader32 =
+            unsafe { transmute(data.as_ptr().add(size_of::<ElfIdent>())) };
         if header.version != ELF_VERSION_CURRENT {
             let header_version = header.version;
             return Err(format!("unsupported version {}", header_version));
@@ -196,48 +200,70 @@ impl<'a> Elf32<'a> {
         }
 
         let (ph, p) = resolve_parts::<ElfProgramHeader32>(
-            data, header.phoff, header.phentsize, header.phnum)?;
+            data,
+            header.phoff,
+            header.phentsize,
+            header.phnum,
+        )?;
         let (sh, s) = resolve_parts::<ElfSectionHeader32>(
-            data, header.shoff, header.shentsize, header.shnum)?;
+            data,
+            header.shoff,
+            header.shentsize,
+            header.shnum,
+        )?;
 
-        Ok(Elf32 { ident, header, ph, sh, p, s })
+        Ok(Elf32 {
+            ident,
+            header,
+            ph,
+            sh,
+            p,
+            s,
+        })
     }
 }
 
-fn resolve_parts<'a, T>(data: &'a [u8], offset: u32, entsize16: u16, num16: u16)
-        -> Result<(Vec<&'a T>, Vec<&'a [u8]>), String>
-        where T: ElfFileAddressable {
-
+fn resolve_parts<'a, T>(
+    data: &'a [u8],
+    offset: u32,
+    entsize16: u16,
+    num16: u16,
+) -> Result<(Vec<&'a T>, Vec<&'a [u8]>), String>
+where
+    T: ElfFileAddressable,
+{
     let entsize = entsize16 as u32;
     let num = num16 as u32;
 
-    let headers = if offset == 0 { Vec::new() } else {
+    let headers = if offset == 0 {
+        Vec::new()
+    } else {
         if (entsize as usize) < size_of::<T>() {
             return Err("headers smaller than defined in specification".to_owned());
         }
         if data.len() < (offset + entsize * num) as usize {
             return Err("reference to data beyond end of file".to_owned());
         }
-        (0..num).map(|i| unsafe {
-            transmute(data.as_ptr().offset((offset + i * entsize) as isize))
-        }).collect::<Vec<&'a T>>()
+        (0..num)
+            .map(|i| unsafe { transmute(data.as_ptr().offset((offset + i * entsize) as isize)) })
+            .collect::<Vec<&'a T>>()
     };
 
-    let blocks = headers.iter().map(|h| -> Result<&'a [u8], String> {
-        let (offset, size) = h.get_range();
-        if size == 0 {
-            Ok(&[])
-        } else if data.len() < (offset + size) as usize {
-            Err("reference to data beyond end of file".to_owned())
-        } else {
-            Ok(unsafe {
-                slice::from_raw_parts(
-                    data.as_ptr().offset(offset as isize),
-                    size as usize
-                )
-            })
-        }
-    }).collect::<Result<Vec<_>, _>>()?;
+    let blocks = headers
+        .iter()
+        .map(|h| -> Result<&'a [u8], String> {
+            let (offset, size) = h.get_range();
+            if size == 0 {
+                Ok(&[])
+            } else if data.len() < (offset + size) as usize {
+                Err("reference to data beyond end of file".to_owned())
+            } else {
+                Ok(unsafe {
+                    slice::from_raw_parts(data.as_ptr().offset(offset as isize), size as usize)
+                })
+            }
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
     Ok((headers, blocks))
 }

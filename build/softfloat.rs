@@ -7,7 +7,6 @@ const SOURCE_FILES: &[&str] = &[
     "s_shiftRightJam128.c",
     "s_approxRecipSqrt_1Ks.c",
     "s_approxRecipSqrt32_1.c",
-
     // Others
     "s_roundToUI32.c",
     "s_roundToI32.c",
@@ -72,13 +71,14 @@ const SPECIALIZATION_FILES: &[&str] = &[
 pub fn build() {
     println!("# building softfloat library");
 
-    let source_files = SOURCE_FILES.iter()
+    let source_files = SOURCE_FILES
+        .iter()
         .map(|f| format!("vendor/SoftFloat-3e/source/{}", f));
-    let specialization_files = SPECIALIZATION_FILES.iter()
+    let specialization_files = SPECIALIZATION_FILES
+        .iter()
         .map(|f| format!("build/softfloat/{}", f));
 
-    let all_files = source_files.chain(specialization_files)
-        .collect::<Vec<_>>();
+    let all_files = source_files.chain(specialization_files).collect::<Vec<_>>();
 
     Build::new()
         .files(all_files)

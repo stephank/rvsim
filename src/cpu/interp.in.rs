@@ -4,10 +4,10 @@
 // fields that should be captured in the `Op` enum variant. Both of these are matched by name to
 // functions defined in the `op` module.
 
-use ::cpu::op::Op;
-use ::cpu::types::{Clock, CpuError, CpuState, Memory, MemoryAccess};
+use crate::cpu::op::Op;
+use crate::cpu::types::{Clock, CpuError, CpuState, Memory, MemoryAccess};
 #[cfg(feature = "rv32fd")]
-use ::softfloat::{self as sf, Sf32, Sf64};
+use crate::softfloat::{self as sf, Sf32, Sf64};
 #[cfg(feature = "rv32fd")]
 use std::num::FpCategory;
 

@@ -1,8 +1,8 @@
 use regex::Regex;
-use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::collections::HashMap;
 use std::env;
-use std::fmt::{Write as FmtWrite};
+use std::fmt::Write as FmtWrite;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
@@ -26,11 +26,20 @@ enum ParseAction {
 }
 
 /** Build the parse tree. */
-fn build_parse_tree(parse_tree: &mut ParseNode, matchers: &[(&str, &str)], first_field: &str, variant: Rc<Variant>) {
+fn build_parse_tree(
+    parse_tree: &mut ParseNode,
+    matchers: &[(&str, &str)],
+    first_field: &str,
+    variant: Rc<Variant>,
+) {
     let mut node = parse_tree;
     let mut prev_value = {
         let (field, value) = matchers[0];
-        assert_eq!(field, first_field, "parser must start with {} field", first_field);
+        assert_eq!(
+            field, first_field,
+            "parser must start with {} field",
+            first_field
+        );
         value.to_owned()
     };
     for &(next_field, next_value) in &matchers[1..] {
@@ -44,20 +53,20 @@ fn build_parse_tree(parse_tree: &mut ParseNode, matchers: &[(&str, &str)], first
             ParseAction::Descend(ref mut next_node) => {
                 assert_eq!(next_node.field, next_field, "parser field order must match");
                 node = next_node;
-            },
+            }
             ParseAction::Finish(_) => {
                 panic!("parser tried to descend into existing match");
-            },
+            }
         }
         prev_value = next_value.to_owned();
     }
     match node.actions.entry(prev_value) {
         Entry::Vacant(entry) => {
             entry.insert(ParseAction::Finish(variant));
-        },
+        }
         Entry::Occupied(_) => {
             panic!("conflicting field value in parser");
-        },
+        }
     }
 }
 
@@ -127,26 +136,32 @@ pub fn build() {
         if prev.starts_with("//% ") && line.starts_with("fn ") {
             // Extract the method name and argument names.
             let method = line[3..].splitn(2, '(').next().unwrap().to_owned();
-            let args = args_re.captures_iter(&line)
+            let args = args_re
+                .captures_iter(&line)
                 .map(|c| (c[1].to_owned(), c[1].to_owned(), c[2].to_owned()))
                 .collect::<Vec<_>>();
 
             // Camelcase the method name to create the `Op` enum variant.
-            let name = method.split('_').map(|s| {
-                format!("{}{}", s[..1].to_uppercase(), &s[1..])
-            }).collect::<Vec<_>>().join("");
+            let name = method
+                .split('_')
+                .map(|s| format!("{}{}", s[..1].to_uppercase(), &s[1..]))
+                .collect::<Vec<_>>()
+                .join("");
 
             // Create the variant.
             let variant = Rc::new(Variant { name, method, args });
             variants.push(Rc::clone(&variant));
 
             // Parse the matchers in the comment.
-            let matchers = prev[4..].split_whitespace().map(|s| {
-                let mut split = s.splitn(2, '=');
-                let field = split.next().unwrap();
-                let value = split.next().unwrap();
-                (field, value)
-            }).collect::<Vec<_>>();
+            let matchers = prev[4..]
+                .split_whitespace()
+                .map(|s| {
+                    let mut split = s.splitn(2, '=');
+                    let field = split.next().unwrap();
+                    let value = split.next().unwrap();
+                    (field, value)
+                })
+                .collect::<Vec<_>>();
 
             build_parse_tree(&mut parse_tree, &matchers, "opcode", variant);
         }
@@ -154,31 +169,53 @@ pub fn build() {
         // Parsing for decompression
         if prev.starts_with("//% ") && line.starts_with("//    ") {
             // Parse the matchers in the comment.
-            let matchers = prev[4..].split_whitespace().map(|s| {
-                let mut split = s.splitn(2, '=');
-                let field = split.next().unwrap();
-                let value = split.next().unwrap();
-                (field, value)
-            }).collect::<Vec<_>>();
+            let matchers = prev[4..]
+                .split_whitespace()
+                .map(|s| {
+                    let mut split = s.splitn(2, '=');
+                    let field = split.next().unwrap();
+                    let value = split.next().unwrap();
+                    (field, value)
+                })
+                .collect::<Vec<_>>();
 
             // Parse the metadata in the comment.
-            let meta = line[6..].split_whitespace().map(|s| {
-                let mut split = s.splitn(2, '=');
-                let field = split.next().unwrap();
-                let value = split.next().unwrap();
-                (field, value)
-            }).collect::<Vec<_>>();
+            let meta = line[6..]
+                .split_whitespace()
+                .map(|s| {
+                    let mut split = s.splitn(2, '=');
+                    let field = split.next().unwrap();
+                    let value = split.next().unwrap();
+                    (field, value)
+                })
+                .collect::<Vec<_>>();
 
-            assert_eq!(meta[0].0, "name", "rv32c description must start with instruction name");
-            assert_eq!(meta[1].0, "decomp", "second part of rv32c description must be decompressed instruction name");
+            assert_eq!(
+                meta[0].0, "name",
+                "rv32c description must start with instruction name"
+            );
+            assert_eq!(
+                meta[1].0, "decomp",
+                "second part of rv32c description must be decompressed instruction name"
+            );
 
             // Camelcase the method name to create the `Op` enum variant.
-            let name = meta[1].1.split('_').map(|s| {
-                format!("{}{}", s[..1].to_uppercase(), &s[1..])
-            }).collect::<Vec<_>>().join("");
+            let name = meta[1]
+                .1
+                .split('_')
+                .map(|s| format!("{}{}", s[..1].to_uppercase(), &s[1..]))
+                .collect::<Vec<_>>()
+                .join("");
 
-            let args = meta[2..].iter().map(|(a,b)| { ( a.to_string(), b.to_string(), String::new() ) }).collect::<Vec<_>>();
-            let variant = Rc::new(Variant { name, method:meta[1].1.to_string(), args });
+            let args = meta[2..]
+                .iter()
+                .map(|(a, b)| (a.to_string(), b.to_string(), String::new()))
+                .collect::<Vec<_>>();
+            let variant = Rc::new(Variant {
+                name,
+                method: meta[1].1.to_string(),
+                args,
+            });
 
             build_parse_tree(&mut parse_tree_c, &matchers, "cquad", variant);
         }
@@ -189,13 +226,17 @@ pub fn build() {
     // Generate `Op` variants source code.
     let mut variants_src = String::new();
     for variant in &variants {
-        let &Variant { ref name, ref args, .. } = &**variant;
+        let &Variant {
+            ref name, ref args, ..
+        } = &**variant;
         if args.is_empty() {
             writeln!(variants_src, "    {},", name).unwrap();
         } else {
-            let field_src = args.iter().map(|&(ref name, _, ref typ)| {
-                format!("{}: {}", name, typ)
-            }).collect::<Vec<_>>().join(", ");
+            let field_src = args
+                .iter()
+                .map(|&(ref name, _, ref typ)| format!("{}: {}", name, typ))
+                .collect::<Vec<_>>()
+                .join(", ");
             writeln!(variants_src, "    {} {{ {} }},", name, field_src).unwrap();
         }
     }
@@ -206,7 +247,7 @@ pub fn build() {
         let mut src = format!("{}match {}(instr) {{\n", spaces, node.field);
         let mut have_default = false;
         let mut items = node.actions.iter().collect::<Vec<_>>();
-        items.sort_by_key(|(k,_)| {*k});
+        items.sort_by_key(|(k, _)| *k);
 
         for (value, action) in items {
             if value == "_" {
@@ -218,18 +259,21 @@ pub fn build() {
             match action {
                 ParseAction::Descend(ref child) => {
                     src.push_str(&node_parse_src(child, indent + 8));
-                },
+                }
                 ParseAction::Finish(ref variant) => {
                     if variant.method == "illegal" {
                         src.push_str(&format!("{}        None\n", spaces));
                     } else {
                         src.push_str(&format!("{}        Some(Op::{} {{\n", spaces, variant.name));
                         for &(ref name, ref extract, _) in &variant.args {
-                            src.push_str(&format!("{}            {}: {}(instr),\n", spaces, name, extract));
+                            src.push_str(&format!(
+                                "{}            {}: {}(instr),\n",
+                                spaces, name, extract
+                            ));
                         }
                         src.push_str(&format!("{}        }})\n", spaces));
                     }
-                },
+                }
             }
             src.push_str(&format!("{}    }},\n", spaces));
         }
@@ -248,16 +292,27 @@ pub fn build() {
     let mut dispatch_src = String::new();
     let spaces = " ".repeat(12);
     for variant in &variants {
-        let &Variant { ref name, ref method, ref args } = &**variant;
-        let params = args.iter().map(|&(ref name, _, _)| name.as_str())
-            .collect::<Vec<_>>().join(", ");
+        let &Variant {
+            ref name,
+            ref method,
+            ref args,
+        } = &**variant;
+        let params = args
+            .iter()
+            .map(|&(ref name, _, _)| name.as_str())
+            .collect::<Vec<_>>()
+            .join(", ");
         let pattern = if params.is_empty() {
             "".to_owned()
         } else {
             format!(" {{ {} }}", params)
         };
-        writeln!(dispatch_src, "{}Op::{}{} => self.{}({}),",
-            spaces, name, pattern, method, params).unwrap();
+        writeln!(
+            dispatch_src,
+            "{}Op::{}{} => self.{}({}),",
+            spaces, name, pattern, method, params
+        )
+        .unwrap();
     }
 
     // Generate the `op.rs`.
@@ -270,7 +325,8 @@ pub fn build() {
             "//% parse" => file.write_all(parse_src.as_bytes()),
             "//% parse_c" => file.write_all(parse_c_src.as_bytes()),
             _ => writeln!(file, "{}", line),
-        }.unwrap();
+        }
+        .unwrap();
     }
 
     // Generate the `interp.rs`.
@@ -288,6 +344,7 @@ pub fn build() {
         match line_trim {
             "//% dispatch" => file.write_all(dispatch_src.as_bytes()),
             _ => writeln!(file, "{}", line),
-        }.unwrap();
+        }
+        .unwrap();
     }
 }
